@@ -173,8 +173,8 @@ Describe 'Invoke-EnvironmentSubstitution'{
 
 Describe 'Resolves Without Mocks'{
   It 'Resolve Web File Checksum Fail'{
-    $r = Get-Random -Maximum 999
-    $d = "$env:TEMP/$r"
+    $t = $(Get-Date (Get-Date).ToUniversalTime() -UFormat '+%Y-%m-%dT%H%M%S')
+    $d = "$env:TEMP/$t"
     New-Item -Path "$d" -ItemType Directory -Force
     $f = "$d/f.txt"
     

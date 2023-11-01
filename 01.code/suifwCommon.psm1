@@ -117,9 +117,9 @@ function Get-WebFileWithChecksumVerification {
       [string]$hashAlgoritm="SHA256"
   )
 
-  Debug-SuifwLogI "Downloading file $fullOutputDirectoryPath /$fileName"
-  Debug-SuifwLogI "From $url"
-  Debug-SuifwLogI "Get-WebFileWithChecksumVerification() - Guaranteeing $hashAlgoritm checksum $expectedHash"
+  Debug-SuifwLogI "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - Downloading file "$fullOutputDirectoryPath/$fileName""
+  Debug-SuifwLogI "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - From $url"
+  Debug-SuifwLogI "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - Guaranteeing $hashAlgoritm checksum $expectedHash"
   
   # assure destination folder
   Debug-SuifwLogI "Eventually create folder $fullOutputDirectoryPath..."
@@ -130,20 +130,20 @@ function Get-WebFileWithChecksumVerification {
 
   # Calculate the SHA256 hash of the downloaded file
   $fileHash = Get-FileHash -Path "$fullFilePath.verify" -Algorithm $hashAlgoritm
-  Debug-SuifwLogI("Get-WebFileWithChecksumVerification() - File hash is $fileHash.Hash .")
+  Debug-SuifwLogI("suifwCommon.psm1::Get-WebFileWithChecksumVerification() - File hash is $fileHash.Hash .")
   Write-Host $fileHash
   # Compare the calculated hash with the expected hash
   $r = $false
   if ($fileHash.Hash -eq $expectedHash) {
     Rename-Item -Path "$fullFilePath.verify" -NewName "$fullFilePath"
-    Debug-SuifwLogI "Get-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash matches the expected hash."
+    Debug-SuifwLogI "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash matches the expected hash."
     $r = $true
   } else {
     Rename-Item -Path "$fullFilePath.verify" -NewName "$fullFilePath.dubious"
-    Debug-SuifwLogE "Get-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash does not match the expected hash."
-    Debug-SuifwLogE "Get-WebFileWithChecksumVerification() - Got $fileHash.Hash, but expected $expectedHash!"
+    Debug-SuifwLogE "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash does not match the expected hash."
+    Debug-SuifwLogE "suifwCommon.psm1::Get-WebFileWithChecksumVerification() - Got $fileHash.Hash, but expected $expectedHash!"
   }
-  Debug-SuifwLogI("Get-WebFileWithChecksumVerification returns $r")
+  Debug-SuifwLogI("suifwCommon.psm1::Get-WebFileWithChecksumVerification returns $r")
   return $r
 }
 
@@ -170,25 +170,25 @@ function Resolve-WebFileWithChecksumVerification{
   )
 
   # Calculate the SHA256 hash of the downloaded file
-  Debug-SuifwLogI("Resolve-WebFileWithChecksumVerification() - checking file $fullFilePath ...")
   $fullFilePath = "$fullOutputDirectoryPath/$fileName"
+  Debug-SuifwLogI("suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - checking file $fullFilePath ...")
 
   # if File exists, just check the checksum
   if (Test-Path $fullFilePath -PathType Leaf){
-    Debug-SuifwLogI("Resolve-WebFileWithChecksumVerification() - file $fullFilePath found.")
+    Debug-SuifwLogI("suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - file $fullFilePath found.")
     $fileHash = Get-FileHash -Path $fullFilePath -Algorithm $hashAlgoritm
-    Debug-SuifwLogI("Resolve-WebFileWithChecksumVerification() - its hash is $fileHash.Hash .")
+    Debug-SuifwLogI("suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - its hash is $fileHash.Hash .")
     if ($fileHash.Hash -eq $expectedHash) {
-      Debug-SuifwLogI "The file's $hashAlgoritm hash matches the expected hash."
+      Debug-SuifwLogI "suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash matches the expected hash."
       return $true
     } else {
-        Debug-SuifwLogI("Resolve-WebFileWithChecksumVerification() - checking file $fullFilePath ...")
-      Debug-SuifwLogE "The file's $hashAlgoritm hash does not match the expected hash. Downloaded file renamed"
-      Debug-SuifwLogE "Got $fileHash.Hash, but expected $expectedHash!"
+        Debug-SuifwLogI("suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - checking file $fullFilePath ...")
+      Debug-SuifwLogE "suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - The file's $hashAlgoritm hash does not match the expected hash. Downloaded file renamed"
+      Debug-SuifwLogE "suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - Got $fileHash.Hash, but expected $expectedHash!"
       return $false
     }
   }
-  Debug-SuifwLogI("Resolve-WebFileWithChecksumVerification() - file $fullFilePath does not exist. Attempt to download.")
+  Debug-SuifwLogI("suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - file $fullFilePath does not exist. Attempting to download...")
   $r = Get-WebFileWithChecksumVerification `
     -url "$url" `
     -fullOutputDirectoryPath "$fullOutputDirectoryPath" `
@@ -196,7 +196,7 @@ function Resolve-WebFileWithChecksumVerification{
     -expectedHash "$expectedHash" `
     -hashAlgoritm "$hashAlgoritm"
   
-  Debug-SuifwLogI "Initialize-SumBootstrapBinary returns $r"
+  Debug-SuifwLogI "suifwCommon.psm1::Resolve-WebFileWithChecksumVerification() - Initialize-SumBootstrapBinary returns $r"
   return $r
 }
 
@@ -264,8 +264,116 @@ function Initialize-SumBootstrapBinary{
       -expectedHash "$expectedHash" `
       -hashAlgoritm "$hashAlgoritm"
 
-  Debug-SuifwLogI "Initialize-SumBootstrapBinary returns $r"
+  Debug-SuifwLogI "suifwCommon.psm1::Initialize-SumBootstrapBinary() - Return $r"
   return $r
+}
+
+################################################### Update Manger Bootstrap
+
+function Install-UpdateManagerWithUnzip(){
+  param (
+    [Parameter(Mandatory=$false)]
+    [string]$sumHome = "X:\SUM",
+  
+    [Parameter(Mandatory=$false)]
+    [string]$sumBootstrapFolder = "$PSScriptRoot\..\03.artifacts",
+
+    [Parameter(Mandatory=$false)]
+    [string]$sumBootstrapFilename = "sum-bootstrap.exe"
+  )
+
+  # Check if we are admin
+  $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+  if ( -Not (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)){
+    Debug-SuifwLogE "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - called without elevation. This cannot work in Windows!"
+    throw "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - called without elevation. This cannot work in Windows!"
+  }
+  Debug-SuifwLogI "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - Boostrapping Update Manager from $sumBootstrap into folder $sumHome..."
+
+  Debug-SuifwlogI "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - Assuring the bootstrap binary file..."
+  Initialize-SumBootstrapBinary -fullOutputDirectoryPath "$sumBootstrapFolder" -fileName "$sumBootstrapFilename"
+  $sumBootstrap="$sumBootstrapFolder/$sumBootstrapFilename"
+  #current timestamp in FS friendly form
+  $ts=$(Get-Date (Get-Date).ToUniversalTime() -UFormat '+%Y-%m-%dT%H%M%S')
+  $td="${env:TEMP}\sum-install-$ts".Replace("/","\")
+  New-Item -ItemType Directory -Path "$td" -Force
+  Expand-Archive -Force "$sumBootstrap" -DestinationPath "$td"
+
+  Push-Location
+  Set-Location "$td"
+
+  $ld=$logSessionDir.Replace("/","\")
+  $cmd = ".\sum-setup.bat --accept-license -d ""$sumHome"" >""$ld\sum-bootstrap.$ts.out.txt"" 2>""$ld\sum-bootstrap.$ts.err.txt"""
+  Debug-SuifwLogI "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - cmd == $cmd"
+
+  cmd /c "$cmd"
+
+  Pop-Location
+  $ret=$?
+  if ($ret -eq $True){
+    Remove-Item "$td" -Force -Recurse
+    Debug-SuifwLogI "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - Update manager successfully installed."
+  }else{
+    Debug-SuifwLogE "suifwCommon.psm1::Install-UpdateManagerWithUnzip() - Update manager installation failed. Temporary folder $td maintained for investigation purposes!"
+  }
+  return $ret
+}
+
+function Install-UpdateManagerWithZFusionParams(){
+  param (
+    [Parameter(Mandatory=$false)]
+    [string]$sumHome = "X:\SUM",
+  
+    [Parameter(Mandatory=$false)]
+    [string]$sumBootstrapFolder = "$PSScriptRoot\..\03.artifacts",
+
+    [Parameter(Mandatory=$false)]
+    [string]$sumBootstrapFilename = "sum-bootstrap.exe"
+  )
+
+  # Check if we are admin
+  $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+  if ( -Not (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)){
+    Debug-SuifwLogE "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - called without elevation. This cannot work in Windows!"
+    throw "suifwCommon.psm1::New-SumBootstrap() - called without elevation. This cannot work in Windows!"
+  }
+  Debug-SuifwlogI "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - Boostrapping Update Manager from $sumBootstrap into folder $sumHome..."
+
+  Debug-SuifwlogI "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - Assuring the bootstrap binary file..."
+  Initialize-SumBootstrapBinary -fullOutputDirectoryPath "$sumBootstrapFolder" -fileName "$sumBootstrapFilename"
+
+  $ts=$(Get-Date (Get-Date).ToUniversalTime() -UFormat '+%Y-%m-%dT%H%M%S')
+  $td="${env:TEMP}\$ts"
+  New-Item -ItemType Directory -Path "$td" -Force
+  $f="${td}\sum-bootstrap.WMSCRIPT.$ts.txt"
+  Debug-SuifwlogI "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - Preparing the temporary script file $f ..."
+  $fbat="${td}\sum-bootstrap.bat"
+
+  "Repository=" > $f
+  "imagePlatform=" >> $f
+  "isAddFixes=true" >> $f
+  "writeImageName=" >> $f
+  "SumServer=" >> $f
+  "readImageName=" >> $f
+  $shr=$sumHome.Replace("\","\\").Replace(":","\:")
+  "InstallDir=$shr" >> $f
+  "useSSL=true" >> $f
+
+  "SET ZFUSION_SUMINSTALL_ARGS=-readScript ""$f""" > $fbat
+  $ld=$logSessionDir.Replace("/","\")
+  $cmd="${sumBootstrapFolder}\${sumBootstrapFilename}".Replace("/","\")
+  "${cmd} >>""$ld\sum-bootstrap.out.txt"" 2>>""$ld\sum-bootstrap.err.txt"""  >> $fbat
+  Debug-SuifwlogI "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - cmd == $fbat"
+  cmd /c call "$fbat"
+  $ret=$?
+
+  if ($ret -eq $True){
+    Remove-Item "$td" -Force -Recurse
+    Debug-SuifwLogI "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - Update manager successfully installed."
+  }else{
+    Debug-SuifwLogE "suifwCommon.psm1::Install-UpdateManagerWithZFusionParams() - Update manager installation failed. Temporary folder $td maintained for investigation purposes!"
+  }
+  return $ret
 }
 
 # Exports
@@ -283,5 +391,7 @@ Export-ModuleMember `
     Get-WebFileWithChecksumVerification, `
     Initialize-InstallerBinary, `
     Initialize-SumBootstrapBinary, `
+    Install-UpdateManagerWithUnzip, `
+    Install-UpdateManagerWithZFusionParams, `
     Invoke-EnvironmentSubstitution, `
     Resolve-WebFileWithChecksumVerification
