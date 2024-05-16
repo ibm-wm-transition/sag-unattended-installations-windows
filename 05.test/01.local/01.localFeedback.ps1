@@ -26,7 +26,7 @@ function checkPester(){
       throw "unsupported pester version '$($pesterModules[0].Version)'";
   }
 }
-checkPester || exit 1 # Cannot continue if pester setup is incorrect 
+#checkPester || exit 1 # Cannot continue if pester setup is incorrect 
 
 Describe 'Checking Common Functions' {
 

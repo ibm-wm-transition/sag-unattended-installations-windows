@@ -34,7 +34,7 @@ Describe 'Bootstrap SUM with defaults'{
   It 'Bootstrap SUM with Zipfusion parameters according to documentation'{
     Install-UpdateManagerWithZFusionParams -sumBootstrapFolder "K:" -sumBootstrapFilename "sum-bootstrap.exe"| Select-Object -Last 1 | Should -Be $true
   }
-   It 'Bootstrap SUM with Unzip'{
+  It 'Bootstrap SUM with Unzip'{
     Install-UpdateManagerWithUnzip -sumBootstrapFolder "K:" -sumBootstrapFilename "sum-bootstrap.exe" -sumHome "X:\SUM2" | Select-Object -Last 1 | Should -Be $true
   }
 }
