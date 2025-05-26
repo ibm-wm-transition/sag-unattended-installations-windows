@@ -1,4 +1,8 @@
-# Software AG Unattended Installations For Windows
+# DISCONTINUED / OBSOLETE Software AG Unattended Installations For Windows
+
+Author has evolved this repository in the following location:
+
+https://github.com/IBM/wm-usf-pwsh
 
 ------------------------------
 
